@@ -26,12 +26,13 @@ start:
   #   address line 20 is tied low, so that addresses higher than
   #   1MB wrap around to zero by default.  This code undoes this.
 seta20.1:
-  inb     $0x64,%al               # Wait for not busy
+  inb     $0x64,%al               # Wait for not busy; read status register from port 0x64 of PS/2 (keyboard) controller
   testb   $0x2,%al
   jnz     seta20.1
 
   movb    $0xd1,%al               # 0xd1 -> port 0x64
-  outb    %al,$0x64
+  outb    %al,$0x64               # This instructs the keyboard controller to
+                                  # prepare for receiving a command on its data port.
 
 seta20.2:
   inb     $0x64,%al               # Wait for not busy
@@ -39,7 +40,8 @@ seta20.2:
   jnz     seta20.2
 
   movb    $0xdf,%al               # 0xdf -> port 0x60
-  outb    %al,$0x60
+  outb    %al,$0x60               # This instructs the keyboard controller to
+                                  # enable the A20 line.
 
   # Switch from real to protected mode, using a bootstrap GDT
   # and segment translation that makes virtual addresses 
